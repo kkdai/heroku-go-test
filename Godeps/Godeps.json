@@ -1,0 +1,5 @@
+{
+	"ImportPath": "github.com/kkdai/GoHeroku",
+	"GoVersion": "go1.3",
+	"Deps": []
+}
