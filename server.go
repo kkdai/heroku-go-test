@@ -6,21 +6,29 @@ import (
 	"github.com/go-martini/martini"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func main() {
 	fmt.Println("listening...")
 	m := martini.Classic()
 	m.Get("/", func() string {
-		response, _ := getJSONResponse()
-		return string(response)
+		allFruit := db.GetAll()
+		var response string
+		for _, v := range allFruit {
+			fmt.Printf(" id = %d name = %s num=%d \n", v.id, v.name, v.num)
+			response = fmt.Sprintf("%s \n id = %d name = %s num=%d \n", response, v.id, v.name, v.num)
+		}
+		return response
 	})
-	m.Get("/albums/:id", getAlbumID)
+	m.Get("/fruit/:id", getFruitID)
 	http.ListenAndServe(":"+os.Getenv("PORT"), m)
 }
 
-func getAlbumID(params martini.Params) string {
-	return "Hello " + "id = " + params["id"] + " from func"
+func getFruitID(params martini.Params) string {
+	id, _ := strconv.Atoi(params["id"])
+	fruit := db.Get(id)
+	return "id = " + params["id"] + "name=" + fruit.name + "num=" + string(fruit.num)
 }
 
 func serveRest(res http.ResponseWriter, req *http.Request) {
@@ -34,14 +42,6 @@ func serveRest(res http.ResponseWriter, req *http.Request) {
 }
 
 func getJSONResponse() ([]byte, error) {
-	fruits := make(map[string]int)
-	fruits["Apple"] = 2
-	fruits["Tomato"] = 3
-
-	vagetables := make(map[string]int)
-	vagetables["Pappers"] = 5
-
-	d := Data{fruits, vagetables}
-	p := Payload{d}
-	return json.MarshalIndent(p, "", " ")
+	fruits_data := DataItem{1, "Apple", 2}
+	return json.MarshalIndent(fruits_data, "", " ")
 }
