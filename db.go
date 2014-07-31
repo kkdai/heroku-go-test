@@ -1,6 +1,8 @@
 package main
 
-import ()
+import (
+	"fmt"
+)
 
 // JSON data
 type DataItem struct {
@@ -53,6 +55,7 @@ func (db *FruitDB) GetAll() []*DataItem {
 }
 
 func (db *FruitDB) Get(id int) *DataItem {
+	fmt.Printf("id=%d \n", id)
 	if len(db.m) == 0 {
 		return nil
 	}

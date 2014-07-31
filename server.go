@@ -12,33 +12,59 @@ import (
 func main() {
 	fmt.Println("listening...")
 	m := martini.Classic()
-	m.Get("/", func() string {
-		allFruit := db.GetAll()
-		var response string
-		for _, v := range allFruit {
-			fmt.Printf(" id = %d name = %s num=%d \n", v.id, v.name, v.num)
-			response = fmt.Sprintf("%s \n id = %d name = %s num=%d \n", response, v.id, v.name, v.num)
-		}
-		return response
-	})
+
+	//REST API
+	defer m.Post("/fruits", addFruit)
 	m.Get("/fruit/:id", getFruitID)
+	m.Get("/fruits", getFruits)
+	m.Get("/", getAll)
 	http.ListenAndServe(":"+os.Getenv("PORT"), m)
 }
 
-func getFruitID(params martini.Params) string {
-	id, _ := strconv.Atoi(params["id"])
-	fruit := db.Get(id)
-	return "id = " + params["id"] + "name=" + fruit.name + "num=" + string(fruit.num)
+func getAll(params martini.Params) string {
+	fmt.Println("getAll...")
+
+	//List all items, currently list all fruits first.
+	return getFruits(params)
+}
+func getFruits(params martini.Params) string {
+	fmt.Println("getFruits...")
+	allFruit := db.GetAll()
+	var response string
+	for _, v := range allFruit {
+		fmt.Printf(" id = %d name = %s num=%d \n", v.id, v.name, v.num)
+		response = fmt.Sprintf("%s \n id = %d name = %s num=%d \n", response, v.id, v.name, v.num)
+	}
+	return response
 }
 
-func serveRest(res http.ResponseWriter, req *http.Request) {
-	//Try json response
-	response, err := getJSONResponse()
+func addFruit(w http.ResponseWriter, r *http.Request) (int, string) {
+	fmt.Println("addFruit...")
+	name, num_s := r.FormValue("name"), r.FormValue("num")
+	num, err := strconv.Atoi(num_s)
 	if err != nil {
-		panic(err)
+		num = 0
 	}
 
-	fmt.Fprint(res, string(response))
+	fruit := DataItem{id: 0, name: name, num: num}
+
+	id, _ := db.Add(&fruit)
+	w.Header().Set("Location", fmt.Sprintf("/albums/%d", id))
+	return http.StatusOK, fmt.Sprintf("add id=%d, name=%s, num=%d\n", id, name, num)
+}
+
+func getFruitID(params martini.Params) string {
+	fmt.Println("getFruitID...")
+	/*
+	* curl -i "http://localhost:5000/fruit/2"
+	 */
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		return "error input\n"
+	}
+	fruit := db.Get(id)
+	return fmt.Sprintf("id=%d, name=%s, total numer=%d\n", id, fruit.name, fruit.num)
+
 }
 
 func getJSONResponse() ([]byte, error) {
