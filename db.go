@@ -22,8 +22,8 @@ type DB interface {
 	GetAll() []*DataItem
 	//Find(band, title string, year int) []*DataItem
 	Add(a *DataItem) (int, error)
-	//Update(a *DataItem) error
-	//Delete(id int)
+	Update(a *DataItem) error
+	Delete(id int)
 }
 
 // The one and only database instance.
@@ -65,6 +65,16 @@ func (db *FruitDB) Get(id int) *DataItem {
 
 func (db *FruitDB) Add(a *DataItem) (int, error) {
 	db.seq++
-	db.m[db.seq] = a
-	return db.seq, nil
+	a.id = db.seq
+	db.m[a.id] = a
+	return a.id, nil
+}
+
+func (db *FruitDB) Delete(id int) {
+	delete(db.m, id)
+}
+
+func (db *FruitDB) Update(a *DataItem) error {
+	db.m[a.id] = a
+	return nil
 }
