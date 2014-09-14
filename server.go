@@ -36,7 +36,7 @@ func getFruits(params martini.Params) string {
 	var response string
 	for _, v := range allFruit {
 		fmt.Printf(" id = %d name = %s num=%d \n", v.id, v.name, v.num)
-		response = fmt.Sprintf("%s \n id = %d name = %s num=%d \n", response, v.id, v.name, v.num)
+		response = 	"%s \n id = %d name = %s num=%d \n", response, v.id, v.name, v.num)
 	}
 	return response
 }
