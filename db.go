@@ -4,11 +4,22 @@ import (
 	"fmt"
 )
 
+// {“user_id”:”USER ID”,
+//  “security_token”:”SECURITY TOKEN” ,
+//  “api_version”:”1”,
+//  “devices”:[{“mac_address”:“01-23-45-67-89-ab”, “status”:”online/offline”},
+//  {“mac_address”:“01-23-45-67-89-ab”, “status”:”online/offline”}]}
+
 // JSON data
+
+type DataItem_in struct {
+	name string `json:"name"`
+	num  int    `json:"num"`
+}
 type DataItem struct {
-	id   int
-	name string
-	num  int
+	id   int    `json:"id"`
+	name string `json:"name"`
+	num  int    `json:"num"`
 }
 
 type FruitDB struct {
