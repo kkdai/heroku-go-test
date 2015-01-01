@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"reflect"
 	"strconv"
 )
 
@@ -73,41 +75,38 @@ func updateFruit(w http.ResponseWriter, r *http.Request, params martini.Params) 
 }
 
 func addFruit(w http.ResponseWriter, r *http.Request) (int, string) {
-	fmt.Println("addFruit...")
+	fmt.Println("addFruit2...")
 
-	r.ParseForm()
-	fmt.Println(r.Form)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("read error")
+	}
+	fmt.Println(body)
+	fmt.Println(reflect.TypeOf(body))
+	fmt.Println(string(body))
 
-	//var dat DataItem_in
 	var dat map[string]interface{}
 
-	for key, _ := range r.Form {
-		fmt.Println("r.form")
-		fmt.Printf("key = ")
-		fmt.Println(key)
-		err := json.Unmarshal([]byte(key), &dat)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
+	err = json.Unmarshal(body, &dat)
+	if err != nil {
+		fmt.Println("Unmarshal error")
 	}
+	fmt.Println(dat)
 
 	for key, value := range dat {
 		fmt.Println("Key:", key, "Value:", value)
 	}
-
-	fmt.Printf(" dat name=%s num=%s \n", dat["name"], dat["num"])
-
 	num_s, _ := dat["num"].(string)
 	name_s, _ := dat["name"].(string)
 	num_i, _ := strconv.Atoi(num_s)
 
 	fruit := DataItem{id: 0, name: name_s, num: num_i}
 
-	id, _ := db.Add(&fruit)
-	w.Header().Set("Location", fmt.Sprintf("/fruits/%d", id))
-	return http.StatusOK, fmt.Sprintf("add id=%d, name=%s, num=%d\n", id, name_s, num_i)
-}
+	db.Add(&fruit)
 
+	//w.Header().Set("Location", fmt.Sprintf("/fruits/%d", id))
+	return http.StatusOK, "work" //fmt.Sprintf("add id=%d, name=%s, num=%d\n", id, name_s, num_i)
+}
 func getFruitID(params martini.Params, r render.Render) {
 	fmt.Println("getFruitID...")
 	/*
