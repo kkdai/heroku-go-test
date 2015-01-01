@@ -14,7 +14,7 @@ import (
 
 type DataItem_in struct {
 	name string `json:"name"`
-	num  int    `json:"num"`
+	num  string `json:"num"`
 }
 type DataItem struct {
 	id   int    `json:"id"`

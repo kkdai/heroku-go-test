@@ -75,27 +75,37 @@ func updateFruit(w http.ResponseWriter, r *http.Request, params martini.Params) 
 func addFruit(w http.ResponseWriter, r *http.Request) (int, string) {
 	fmt.Println("addFruit...")
 
-	fmt.Printf("body =%s \n", r.Body)
-	decoder := json.NewDecoder(r.Body)
-	var t DataItem_in
-	err := decoder.Decode(&t)
-	if err != nil {
-		fmt.Println("error happen")
-	}
-	// name_s, num_s := r.FormValue("name"), r.FormValue("num")
-	// fmt.Println(name_s)
-	// fmt.Println(num_s)
-	fmt.Printf("Post data name=%s, total numer=%d \n", t.name, t.num)
-	// num_i, err := strconv.Atoi(num_s)
-	// if err != nil {
-	// 	num_i = 0
-	// }
+	r.ParseForm()
+	fmt.Println(r.Form)
 
-	fruit := DataItem{id: 0, name: t.name, num: t.num}
+	//var dat DataItem_in
+	var dat map[string]interface{}
+
+	for key, _ := range r.Form {
+		fmt.Println("r.form")
+		fmt.Printf("key = ")
+		fmt.Println(key)
+		err := json.Unmarshal([]byte(key), &dat)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}
+
+	for key, value := range dat {
+		fmt.Println("Key:", key, "Value:", value)
+	}
+
+	fmt.Printf(" dat name=%s num=%s \n", dat["name"], dat["num"])
+
+	num_s, _ := dat["num"].(string)
+	name_s, _ := dat["name"].(string)
+	num_i, _ := strconv.Atoi(num_s)
+
+	fruit := DataItem{id: 0, name: name_s, num: num_i}
 
 	id, _ := db.Add(&fruit)
 	w.Header().Set("Location", fmt.Sprintf("/fruits/%d", id))
-	return http.StatusOK, fmt.Sprintf("add id=%d, name=%s, num=%d\n", id, t.name, t.num)
+	return http.StatusOK, fmt.Sprintf("add id=%d, name=%s, num=%d\n", id, name_s, num_i)
 }
 
 func getFruitID(params martini.Params, r render.Render) {
